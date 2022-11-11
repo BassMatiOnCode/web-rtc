@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="-310 -165 620 290" width="620" xmlns="http://www.w3.org/2000/svg">
+
+<link rel="stylesheet" href="drawings.css" xmlns="http://www.w3.org/1999/xhtml"/>
+
+<style>
+	rect { rx:15 ; ry:15 }
+	.textbox rect { stroke-width : 1 ; rx:0 ; ry:0 }
+	line { stroke-width : 1 ; marker-start : url(#dot) ; marker-end : url(#arrow) }
+	.external>rect { stroke : darkviolet }
+	.xpeer>rect { stroke : darkorange }
+	.xnat>rect { stroke : mediumseagreen }
+	</style>
+
+<g>
+	<marker id="arrow" viewBox="-2 -2 19 12" refX="15" refY="4" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="10" orient="auto-start-reverse">
+		<path d="M 0 0 L 15 4 L 0 8 z"/>
+		</marker>
+
+	<marker id="dot" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10">
+		<circle cx="0" cy="0" r="4" /> 
+		</marker>
+
+	</g>
+
+<g class="stun external" transform="translate( -270, -130 )">
+	<rect x="-30" y="-25" width="60" height="50" />
+	<text x="0" y="0">STUN</text>
+	<line x1="10" x2="10" y1="25" y2="100" />
+	<g class="textbox" transform="translate( 10, 60 )">
+		<rect x="-15" y="-10" width="30" height="20" />
+		<text>ICE</text>
+		</g>
+	</g>
+
+<g class="peer" transform="translate( -270, 0 )">
+	<rect x="-30" y="-30" width="60" height="140" />
+	<text x="0" y="35">Peer A</text>
+	<line x1="-10" x2="-10" y1="-30" y2="-105" />
+	<line x1="30" x2="70" y1="-10" y2="-10" />
+	<line x1="30" x2="70" y1="60" y2="60" />
+	</g>
+
+<g class="nat" transform="translate( -170, 0 )">
+	<rect x="-30" y="-30" width="60" height="140" />
+	<text x="0" y="35">NAT A</text>
+	<line x1="30" x2="125" y1="-10" y2="-10" />
+	<line x1="-30" x2="-70" y1="20" y2="20" />
+	<g class="textbox" transform="translate( 75, -10 )">
+		<rect x="-25" y="-10" width="50" height="20" />
+		<text>SDP A</text>
+		</g>
+	<line x1="30" x2="310" y1="60" y2="60" />
+	<g class="textbox" transform="translate( 170, 60 )">
+		<rect x="-100" y="-10" width="200" height="20" />
+		<text>Audio, Video, Realtime Data</text>
+		</g>
+	<line x1="-30" x2="-70" y1="90" y2="90" />
+	</g>
+
+<g class="server external" transform="translate( 0, 0 )">
+	<rect x="-45" y="-30" width="90" height="70" />
+	<text x="0" y="-5">MX</text>
+	<text x="0" y="15">Server</text>
+	<line x1="45" x2="140" y1="-10" y2="-10" />
+	<g class="textbox" transform="translate( 90, -10 )">
+		<rect x="-25" y="-10" width="50" height="20" />
+		<text>SDP A</text>
+		</g>
+	<line x1="-45" x2="-140" y1="20" y2="20" />
+	<g class="textbox" transform="translate( -90, 20 )">
+		<rect x="-25" y="-10" width="50" height="20" />
+		<text>SDP B</text>
+		</g>
+	</g>
+
+<g class="nat" transform="translate( 170, 0 )">
+	<rect x="-30" y="-30" width="60" height="140" />
+	<text x="0" y="35">NAT A</text>
+	<line x1="30" x2="70" y1="-10" y2="-10" />
+	<line x1="-30" x2="-125" y1="20" y2="20" />
+	<g class="textbox" transform="translate( -75, 20 )">
+		<rect x="-25" y="-10" width="50" height="20" />
+		<text>SDP B</text>
+		</g>
+	<line x1="30" x2="70" y1="60" y2="60" />
+	<line x1="-30" x2="-310" y1="90" y2="90" />
+	<g class="textbox" transform="translate( -170, 90 )">
+		<rect x="-100" y="-10" width="200" height="20" />
+		<text>Audio, Video, Realtime Data</text>
+		</g>
+	</g>
+
+<g class="peer" transform="translate( 270, 0 )">
+	<rect x="-30" y="-25" width="60" height="130" />
+	<text x="0" y="35">Peer B</text>
+	<line x1="-10" x2="-10" y1="-25" y2="-105" />
+	<line x1="-30" x2="-70" y1="20" y2="20" />
+	<line x1="-30" x2="-70" y1="90" y2="90" />
+	</g>
+
+<g class="stun external" transform="translate( 270, -130 )">
+	<rect x="-30" y="-25" width="60" height="50" />
+	<text x="0" y="0">STUN</text>
+	<line x1="10" x2="10" y1="25" y2="105" />
+	<g class="textbox" transform="translate( 10, 60 )">
+		<rect x="-15" y="-10" width="30" height="20" />
+		<text>ICE</text>
+		</g>
+	</g>
+
+</svg>

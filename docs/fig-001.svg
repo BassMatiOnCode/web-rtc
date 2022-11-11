@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="-170 -45 340 90" width="340" xmlns="http://www.w3.org/2000/svg">
+
+<link rel="stylesheet" href="drawings.css" xmlns="http://www.w3.org/1999/xhtml"/>
+
+<style>
+	rect { rx:15 ; ry:15 }
+	line { stroke-width : 1 ; marker-start : url(#dot) ; marker-end : url(#arrow) }
+	</style>
+
+<g>
+	<marker id="arrow" viewBox="-2 -2 19 12" refX="15" refY="4" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="10" orient="auto-start-reverse">
+		<path d="M 0 0 L 15 4 L 0 8 z"/>
+		</marker>
+
+	<marker id="dot" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10">
+		<circle cx="0" cy="0" r="4" /> 
+		</marker>
+
+	</g>
+
+<g class="peer" transform="translate( -130, 0 )">
+	<rect x="-30" y="-25" width="60" height="50" />
+	<text x="0" y="0">Peer A</text>
+	<line x1="30" x2="230" y1="-10" y2="-10" />
+	</g>
+
+<g class="peer" transform="translate( 130, 0 )">
+	<rect x="-30" y="-25" width="60" height="50" />
+	<text x="0" y="0">Peer B</text>
+	<line x1="-30" x2="-230" y1="10" y2="10" />
+	</g>
+
+</svg>

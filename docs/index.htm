@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="en-US"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="template-info" file-name="empty.htm" version="2022-10-09" editor="USP" />
+<meta name="author" content="USP" />
+<meta name="creation-date" content="2022-11-10" />
+<meta name="editor" content="USP" />
+<meta name="change-date" content="2022-11-10" />
+<meta name="version" content="1" />
+<meta name="categories" content="Programming > Web > Technologies" />
+<meta name="tags" content="programming, Web, technology, real-time, communication, JavaScript, browser, video, audio, data, peer-to-peer" />
+<meta name="description" content="WebRTC is a browser peer-to-peer realtime communication technology, designed to enable video and audio streaming in browser environments." />
+
+<link rel="stylesheet" href="/inc/page.css" />
+<link rel="stylesheet" href="local.css" />
+ 
+<title>Web Technologies &endash; WebRTC</title>
+
+</head><body><header id="page-header"><object data="title.svg" type="image/svg+xml" style="height : 100% ; margin-left : 160px"></object></header><div id="main-toolbar"></div><main id="page-content">
+
+<p class="category">Web Technologies</p>
+
+<h1>WebRTC</h1>
+
+<p id="page-abstract"></p>
+
+<p>Peer-to-peer communication as shown in figur 1 is simple, fast and efficient, and offers low latency:</p>
+
+<figure>
+	<figcaption class="figure">Peer-to-peer communication</figcaption>
+	<object type="image/svg+xml" data="fig-001.svg" style="border:1px solid silver"></object>
+	</figure>
+
+<p>But the real world is more complex. Firstly, both peers need to know their public IP address and port number to be able to connect to each other. Secondly, the Peers are usually behind a NAT router and have only a private (local) addresses, whereas now the routers have a public address.</p>
+
+<figure>
+	<figcaption class="figure">NAT Routers are in the way</figcaption>
+	<object type="image/svg+xml" data="fig-002.svg" style="border:1px solid silver"></object>
+	</figure>
+
+<p>The peer can open a port to listen on for incoming connections, but will not be reachable from the public &mdash; unless the NAT router is configured to open a port and forward inbound traffic to that peer.</p>
+
+<p>Configuring a router is a security-relevant task, so in a company you won't have much luck to convice the IT department to open an arbitrary port just for you to hold a video conference.</p>
+
+<p>However, computers behind a NAT router <em>are</em> able to connect to a public server in the internet, the NAT router automatically takes measures to forward responses from the server to the peer. So the obvious next step is to place a message relay in the public address space and make it manage the data exchange between the peers. Just like a public chat server:</p>
+
+<figure>
+	<figcaption class="figure">Client-Server Model with WebSockets</figcaption>
+	<object type="image/svg+xml" data="fig-003.svg" style="border:1px solid silver"></object>
+	</figure>
+
+<p>Another reason to choose this model for <em>browser-to-browser communication</em> is that the browser as HTTP client cannot be configured as server for inbound traffic. Even switching to the WebSocket API won't help, because there is no <tt>listen</tt> method available.</p>
+
+<p>This works well for applications where latencies of about one second is okay. WebSockets can improve significantly on latency. But for realtime applications, we actually do need direct peer-to-peer connections. WebRTC is a good option, because with WebRTC <em>a browser can listen for inbound traffic</em>.</p>
+
+<p>So we are effectively back at figure 2, but this time with browser endpoints at both peers.:</p>
+
+<figure>
+	<figcaption>Figure 2: Browser-to-browser communication with WebRTC</figcaption>
+	<object type="image/svg+xml" data="fig-002.svg" style="border:1px solid silver"></object>
+	</figure>
+
+<p>With the same problems as above. However, the situation with NAT and firewall configuration for WebRTC has relaxed somewhat, so we can assume here that NAT and Firewall allow inbound traffic to the peers.</p>
+
+<p>To establish a connection, the peers need to somehow exchange their public addresses and port numbers, agree on other things such as codecs and other things, and off you go.</p>
+
+<p>However, finding out these details would likely be too difficult for the average user in the office and at home. So let's introduce some signalling infrastructure to the scene:</p>
+
+<figure>
+	<figcaption class="figure">Peer-to-peer communication with WebRTC</figcaption>
+	<object type="image/svg+xml" data="fig-004.svg" style="border:1px solid silver"></object>
+	</figure>
+
+<p>We have the peers behind NAT routers, a public message relay server in the middle and STUN servers above. There are two direct UDP connections between peer A and peeer B at the bottom (with the NAT routers in between, of course). This is where the realtime data flows. The additional infrastructure is used for <em>sesstion signaling and negotiation</em>. </p>
+
+<p>Phase 1: A <i>Session Description Protocol</i> object (SDP) contains information about a session, and the client's capabilities, such as its public address, codec, media type, et cetera. Peer 1 loggs into the message server and sends its SDP offers, one for each possible configuration.</p>
+
+<p>Peer B logs into the message server, receives its SDPs, and sends a suitable SDP answer to the server. The server forwards them to peer A.</p>
+
+<p>At this point, both peers have enough information about the other peer's configuration.</p>
+
+<p>Phase 2: An <i>ICE candidate</i> is an object that contains the public address and port number of a peer for the other peer to connect to. A peer contacts a public STUN (Session Traversal Utilities for NAT). server to obtain a number of ICE candidates ("What is my public IP address?"). These are sent to the message server and then forwarded to peer B.</p>
+
+<p></p>
+
+<p>Peer B does the same and sends his ICE candidates to peer A.</p>
+
+<p>Now both peers have information to establish the realtime connections at the bottom in figure 2.</p>
+
+
+<p>To find out how the connection is established, let's have a look at the following time flow diagram:</p>
+
+<figure>
+	<figcaption class="figure">Peer-to-peer communication with WebRTC</figcaption>
+	<object type="image/svg+xml" data="fig-005.svg" style="border:1px solid silver"></object>
+	</figure>
+
+
+<p>The procedure now becomes self-explanatory. The exchange of data in the preparation phase is called <i>signalling</i>.</p>
+
+<h2 cbc>TURN</h2><div>
+
+<p>Sometimes there are firewalls that prevent incoming traffic to one of the peers. In this case, a TURN (Traversal Using Relays around NAT) server must be used. A TURN server does exactly the same what the MX server does for signalling: Forward data packages between two clients. However, low latency is paramount here. This does not apply to the MX server, latencies in the range of secconds are perfectly acceptable.</p>
+
+<figure>
+	<figcaption class="figure">Using a TURN Server</figcaption>
+	<object type="image/svg+xml" data="fig-006.svg" style="border:1px solid silver"></object>
+	</figure>
+
+
+<p>An open-source TURN server can be found on <a href="https://github.com/coturn/coturn">Github Coturn</a>.</p>
+
+<!--h2--></div>
+
+
+</main><footer id="page-footer"></footer><script type="module" src="/inc/page.js" ></script></body></html>

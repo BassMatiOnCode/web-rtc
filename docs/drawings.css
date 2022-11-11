@@ -1,0 +1,7 @@
+/* Style for SVG drawings */
+
+circle { stroke : black ; stroke-width : 2px ; fill : white }
+line { stroke : black ; stroke-width : 2px }
+path { stroke : black ; stroke-width : 2px }
+rect { stroke : black ; stroke-width : 2px ; fill : white }
+text { stroke : none ; fill : black ; text-anchor : middle ; alignment-baseline : central }
