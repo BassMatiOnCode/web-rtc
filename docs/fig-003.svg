@@ -14,7 +14,7 @@
 		</marker>
 
 	<marker id="dot" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10">
-		<circle cx="0" cy="0" r="4" /> 
+		<!--<circle cx="0" cy="0" r="4" />--> 
 		</marker>
 
 	</g>

@@ -14,6 +14,13 @@
 
 <link rel="stylesheet" href="/inc/page.css" />
 <link rel="stylesheet" href="local.css" />
+
+<style>
+figure {
+	max-width : 100% ;
+	overflow : auto ;
+	}
+</style>
  
 <title>Web Technologies &endash; WebRTC</title>
 
@@ -24,6 +31,19 @@
 <h1>WebRTC</h1>
 
 <p id="page-abstract"></p>
+
+<ul>
+<li>browser to browser communication with high speed and low latency.</li>
+<li>One must act as a server and open a socket and listen on a port for a client to connect. Works if both are in the same local network.</li>
+<li>Firewall on the server can prevent incoming traffic.</li>
+<li>If both peers are in different private networks, their traffic must be routed over the public internetwork: Router required. NAT router.</li>
+<li>NAT router must be configured to open a port and forward incoming traffic to the peer in the local network. Peers must learn the public address and port number of each other's router. </li>
+<li>Additional information must be exchanged: Video and audio codecs, encryption, ...</li>
+<li>WebRTC does not specify how this information is exchanged between peers. This could be done manually by a copy & paste procedure.</li>
+<li>Typically a public message relay server is used with HTTP or WebSockets. The relay works like a public chat server that exchanges messages between two peers.</li>
+</ul>
+
+<h2 cbc>Architectures</h2><div>
 
 <p>Peer-to-peer communication as shown in figur 1 is simple, fast and efficient, and offers low latency:</p>
 
@@ -47,7 +67,7 @@
 
 <figure>
 	<figcaption class="figure">Client-Server Model with WebSockets</figcaption>
-	<object type="image/svg+xml" data="fig-003.svg" style="border:1px solid silver"></object>
+	<object type="image/svg+xml" data="fig-003.svg" style="width:400px ; border:1px solid silver"></object>
 	</figure>
 
 <p>Another reason to choose this model for <em>browser-to-browser communication</em> is that the browser as HTTP client cannot be configured as server for inbound traffic. Even switching to the WebSocket API won't help, because there is no <tt>listen</tt> method available.</p>
@@ -63,26 +83,24 @@
 
 <p>With the same problems as above. However, the situation with NAT and firewall configuration for WebRTC has relaxed somewhat, so we can assume here that NAT and Firewall allow inbound traffic to the peers.</p>
 
-<p>To establish a connection, the peers need to somehow exchange their public addresses and port numbers, agree on other things such as codecs and other things, and off you go.</p>
+<p>To establish the high-speed connection, the peers need to somehow exchange their public addresses and port numbers, agree on other things such as codecs and other things, and off you go.</p>
 
 <p>However, finding out these details would likely be too difficult for the average user in the office and at home. So let's introduce some signalling infrastructure to the scene:</p>
 
 <figure>
 	<figcaption class="figure">Peer-to-peer communication with WebRTC</figcaption>
-	<object type="image/svg+xml" data="fig-004.svg" style="border:1px solid silver"></object>
+	<object type="image/svg+xml" data="fig-004.svg" style="width:450px ; border:1px solid silver"></object>
 	</figure>
 
-<p>We have the peers behind NAT routers, a public message relay server in the middle and STUN servers above. There are two direct UDP connections between peer A and peeer B at the bottom (with the NAT routers in between, of course). This is where the realtime data flows. The additional infrastructure is used for <em>sesstion signaling and negotiation</em>. </p>
+<p>We have the peers behind NAT routers, a public message relay server in the middle and STUN servers above. There are two direct UDP connections between peer A and peeer B at the bottom (with the NAT routers in between, of course). This is where the realtime data flows. The additional infrastructure is used for <em>sesstion signaling and negotiation</em>. Note that the signaling part is not defined in WebRTC. It's up to the implementer to exchange the signaling data. Somehow. </p>
 
-<p>Phase 1: A <i>Session Description Protocol</i> object (SDP) contains information about a session, and the client's capabilities, such as its public address, codec, media type, et cetera. Peer 1 loggs into the message server and sends its SDP offers, one for each possible configuration.</p>
+<p>Phase 1: A <i>Session Description Protocol</i> object (SDP) contains information about a session, and the client's capabilities, such as its public address, encryption, compression, codec, media type, et cetera. Peer 1 loggs into the message server and sends its SDP offers, one for each possible configuration.</p>
 
 <p>Peer B logs into the message server, receives its SDPs, and sends a suitable SDP answer to the server. The server forwards them to peer A.</p>
 
 <p>At this point, both peers have enough information about the other peer's configuration.</p>
 
-<p>Phase 2: An <i>ICE candidate</i> is an object that contains the public address and port number of a peer for the other peer to connect to. A peer contacts a public STUN (Session Traversal Utilities for NAT). server to obtain a number of ICE candidates ("What is my public IP address?"). These are sent to the message server and then forwarded to peer B.</p>
-
-<p></p>
+<p>Phase 2: An <i>Interactive Connectivity Establishment</i> (ICE) candidate is an object that contains the public address*es) and port number(s) of a peer for the public (or the other peer) to connect to. A peer contacts a public STUN (Session Traversal Utilities for NAT). server to obtain a number of ICE candidates ("What is my public IP address?"). These are sent to the message server and then forwarded to peer B.</p>
 
 <p>Peer B does the same and sends his ICE candidates to peer A.</p>
 
@@ -99,9 +117,11 @@
 
 <p>The procedure now becomes self-explanatory. The exchange of data in the preparation phase is called <i>signalling</i>.</p>
 
+<!--h2--></div>
+
 <h2 cbc>TURN</h2><div>
 
-<p>Sometimes there are firewalls that prevent incoming traffic to one of the peers. In this case, a TURN (Traversal Using Relays around NAT) server must be used. A TURN server does exactly the same what the MX server does for signalling: Forward data packages between two clients. However, low latency is paramount here. This does not apply to the MX server, latencies in the range of secconds are perfectly acceptable.</p>
+<p>Sometimes there are firewalls or routers that prevent incoming traffic to one of the peers. In this case, a TURN (Traversal Using Relays around NAT) server must be used. A TURN server does exactly the same what the MX relay server does for signalling: Forward data packages between two clients. However, low latency is paramount here. This does not apply to the MX server, latencies in the range of secconds are perfectly acceptable.</p>
 
 <figure>
 	<figcaption class="figure">Using a TURN Server</figcaption>
@@ -110,6 +130,16 @@
 
 
 <p>An open-source TURN server can be found on <a href="https://github.com/coturn/coturn">Github Coturn</a>.</p>
+
+<!--h2--></div>
+
+<h2 cbc>WebRTC API</h2><div>
+
+<dl>
+<dt>Interactive Connectivity Establishment (ICE) Protocol</dt>
+<dd>ICE canditates contain all possible ways to connect to the peer, through public, local or reflexive addresses, or through a (list of) TURN servers as last resort. </dd>
+<dd>All ICE candidates are then packed into an SDP record.</dd>
+</dl>
 
 <!--h2--></div>
 

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="editor" content="USP" />
+<meta name="change-date" content="2022-11-14" />
+<meta name="version" content="1" />
+<meta name="tags" content="Web, technology, WebRTC, demo." />
+<meta name="description" content="WebRTC Demo 1" />
+
+<style>
+.sdp-box { border : 1px solid silver ; min-height : 20px ; xmax-height : 60px ; overflow : auto }
+.demo .button { border : 1px solid black ; border-radius : 3px ; background-color : lightgrey ; padding : 1px 5px ; margin : 2px 5px }
+.demo .button:first-child { margin-left : 0px }
+body { margin : 0px 20px 0px 40px }
+#message-to-peer { padding : 5px }
+</style>
+ 
+<title>WebRTC Demo 1</title>
+
+</head><body>
+
+<h1>WebRTC Demo 1</h1>
+
+
+<div class="demo">
+<figcaption>Local SDP</figcaption>
+<div id="local-sdp" class="sdp-box"></div>
+<p><span id="create-sdp-offer" class="button">Create local SDP Offer</span><span id="send-sdp-offer" class="button">Send offer to peer</span></p>
+
+<figcaption>Remote SDP</figcaption>
+<div id="remote-sdp" class="sdp-box"></div>
+<p><span id="receive-sdp-offer" class="button">Receive SDP Offer</span><span id="accept-sdp-offer" class="button">Accept SDP Offer</span></p>
+
+<p><span id="create-sdp-answer" class="button">Create SDP Answer</span><span id="send-sdp-answer" class="button">Send SDP Answer</span></p>
+
+<p><span id="receive-sdp-answer" class="button">Receive SDP Answer</span><span id="accept-sdp-answer" class="button">Accept SDP Answer</span></p>
+
+<figcaption>Console Messages</figcaption>
+<div id="messages" class="sdp-box"></div>
+
+<figcaption>Messages from peer</figcaption>
+<div id="messages-from-peer" class="sdp-box"></div>
+
+<figcaption>Message to peer</figcaption>
+<div id="message-to-peer" class="sdp-box" contenteditable="true"></div>
+<p><span id="send-message" class="button">Send Message</span></p>
+</div>
+
+
+<script>
+
+( function ( ) {
+	// Server configuration carries the URLs
+	// of servers we are going to use
+const iceConfiguration = { 
+	iceServers : [ {
+		urls: 'turn:my-turn-server.mycompany.com:19403',
+		username: 'optional-username',
+		credential: 'auth-token'
+		} , {
+		urls: 'stun:stun1.1.google.com:19302' 
+		} , {
+		urls: 'stun:stun2.1.google.com:19302' 
+	}	]	} ;
+
+	// Create the connection object
+	const peerConnection = new RTCPeerConnection( iceConfiguration );
+	
+	peerConnection
+		.addEventListener( "icecandidate", async ( e ) => { 
+		// Update local sdp offer text every time we get a new ICE candidate
+		const sdp = JSON.stringify ( peerConnection.localDescription );
+		console.log( "peerConnection.onIceCandidate" );
+		console.log( sdp );
+		if ( e.candidate ) document.getElementById( "local-sdp" ).innerHTML = sdp;
+		} ) ;
+
+	peerConnection.addEventListener( "datachannel", e => {
+		console.log( "Data channel opened by peer" );
+		const channel = e.channel;
+		channel.onopen = ( ) => {
+			console.log( "data channel opened" );
+			channel.send( "Hello back" );
+			}
+		channel.onmessage = ( e ) => document.getElementById( "messages-from-peer" ).innerHTML += e.data + "<br/>" ;
+		} ) ;
+
+	// Create the data channel
+	let dataChannel = peerConnection.createDataChannel( "data-channel"  );
+
+	dataChannel.addEventListener( "open", ( ) => {
+		dataChannel.send( "hello" );
+		console.log( "Connection opened" );
+		} ) ;
+
+	dataChannel.addEventListener( "message", e => {
+		document.getElementById( "messages-from-peer" ).innerHTML += e.data + "<br/>" ;
+		} ) ;
+
+	dataChannel.addEventListener( "close", ( ) => {
+		console.log( "Connection closed" );
+		} ) ;
+
+	// Add an event listener to the create offer button
+	document.getElementById( "create-sdp-offer" )
+		.addEventListener( "click", async ( ) => {
+			// Create the offer, set local description and copy
+			// the string version into the GUI box.
+			let offer = await peerConnection.createOffer( );
+			await peerConnection.setLocalDescription( offer );
+			console.log( "SDP offer created" );
+		} ) ;
+
+	document.getElementById( "send-sdp-offer" )
+		.addEventListener( "click", ( ) => { 
+		const offer = JSON.stringify ( peerConnection.localDescription );
+		navigator.clipboard.writeText( offer );
+		console.log( "SDP offer copied to clipboard" );
+		} ) ;
+
+	document.getElementById( "receive-sdp-offer" )
+		.addEventListener( "click", async ( ) => {
+		const offer = await navigator.clipboard.readText( )
+		document.getElementById( "remote-sdp" ).innerText = offer ;
+		console.log( "SDP offer retrieved from clipboard" );
+		} ) ;
+
+	document.getElementById( "accept-sdp-offer" )
+		.addEventListener( "click", ( ) => {
+		const offer = JSON.parse ( document.getElementById( "remote-sdp" ).innerText );
+		peerConnection.setRemoteDescription( offer );
+		console.log( "Remote description set from SDP offer" );
+		} ) ;
+
+	document.getElementById( "create-sdp-answer" )
+		.addEventListener( "click", async ( ) => {
+			// Create the answer and set local description.
+			// This will generate IceCandidate events.
+			// The SDP answer willl appear in the local sdp box.
+			let answer = await peerConnection.createAnswer( );
+			await peerConnection.setLocalDescription( answer );
+			console.log( "SDP answer created" );
+		} ) ;
+
+	document.getElementById( "send-sdp-answer" )
+		.addEventListener( "click", ( ) => { 
+		const answer = JSON.stringify ( peerConnection.localDescription );
+		navigator.clipboard.writeText( answer );
+		console.log( "SDP answer copied to clipboard" );
+		} ) ;
+
+	document.getElementById( "receive-sdp-answer" )
+		.addEventListener( "click", async ( ) => {
+		const offer = await navigator.clipboard.readText( )
+		document.getElementById( "remote-sdp" ).innerText = offer ;
+		console.log( "SDP answer retrieved from clipboard" );
+		} ) ;
+
+	document.getElementById( "accept-sdp-answer" )
+		.addEventListener( "click", ( ) => {
+		if ( peerConnection.remoteDescription ) return;
+		const answer = JSON.parse ( document.getElementById( "remote-sdp" ).innerText );
+		if ( ! answer ) return alert( "Receive SDP answer from peer first!" ); 
+		peerConnection.setRemoteDescription( answer );
+		console.log( "Remote description set from SDP answer" );
+		} ) ;
+
+	document.getElementById( "send-message" )
+		.addEventListener( "click", ( ) => {
+		const msgbox = document.getElementById( "message-to-peer" );
+		dataChannel.send( msgbox.innerText );
+		msgbox.innerText = "" ;
+		} ) ;
+		
+	} ) ( ) ;
+
+</script>
+</body></html>

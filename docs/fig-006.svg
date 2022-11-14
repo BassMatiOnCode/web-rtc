@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg viewBox="-210 -165 420 310" width="420" xmlns="http://www.w3.org/2000/svg">
 
+<!-- WebRTC Data Communication with TURN server -->
+
 <link rel="stylesheet" href="drawings.css" xmlns="http://www.w3.org/1999/xhtml"/>
 
 <style>
@@ -16,7 +18,7 @@
 		</marker>
 
 	<marker id="dot" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10">
-		<circle cx="0" cy="0" r="4" /> 
+		<!--<circle cx="0" cy="0" r="4" />--> 
 		</marker>
 
 	</g>

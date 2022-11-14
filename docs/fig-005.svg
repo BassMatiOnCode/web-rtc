@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="-160 -20 560 480" width="560" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="-160 -20 640 580" width="640" xmlns="http://www.w3.org/2000/svg">
 
 <link rel="stylesheet" href="drawings.css" xmlns="http://www.w3.org/1999/xhtml"/>
 
 <style>
-	g text:nth-child(4) { text-anchor : start }
+	text.info { text-anchor : start }
 	.time-line { stroke : grey ; stroke-width : 1 ; stroke-dasharray : 3 3 }
 	rect { rx:10 ; ry:10 }
 	g.src-a .arrow { stroke : cornflowerblue ;  marker-start : url(#dot-a) ; marker-end : url(#arrow-a) }
@@ -17,7 +17,7 @@
 		</marker>
 
 	<marker id="dot-a" viewBox="-5 -5 10 10" refX="0" refY="0" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10">
-		<circle cx="0" cy="0" r="4" /> 
+		<!--<circle cx="0" cy="0" r="4" />--> 
 		</marker>
 
 	</g>
@@ -26,31 +26,31 @@
 	<g transform="translate( -110, 0 )">
 		<rect x="-15" y="-15" width="30" height="30" />
 		<text x="0" y="0">A</text>
-		<line x1="0" x2="0" y1="15" y2="450" />h
+		<line x1="0" x2="0" y1="15" y2="540" />h
 		</g>
 
 	<g transform="translate( -60, 0 )">
 		<rect x="-25" y="-15" width="50" height="30" />
 		<text x="0" y="0">STUN</text>
-		<line x1="0" x2="0" y1="15" y2="450" />
+		<line x1="0" x2="0" y1="15" y2="540" />
 		</g>
 
 	<g transform="translate( 0, 0 )">
 		<rect x="-25" y="-15" width="50" height="30" />
 		<text x="0" y="0">MXS</text>
-		<line x1="0" x2="0" y1="15" y2="450" />
+		<line x1="0" x2="0" y1="15" y2="540" />
 		</g>
 
 	<g transform="translate( 60, 0 )">
 		<rect x="-25" y="-15" width="50" height="30" />
 		<text x="0" y="0">STUN</text>
-		<line x1="0" x2="0" y1="15" y2="450" />
+		<line x1="0" x2="0" y1="15" y2="540" />
 		</g>
 
 	<g transform="translate( 110, 0 )">
 		<rect x="-15" y="-15" width="30" height="30" />
 		<text x="0" y="0">B</text>
-		<line x1="0" x2="0" y1="15" y2="450" />
+		<line x1="0" x2="0" y1="15" y2="540" />
 		</g>
 	</g>
 
@@ -59,57 +59,53 @@
 	<g class="src-a" transform="translate(0, 40)">
 		<text x="-140" y="0">t0</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="-110" x2="0" class="arrow" />
-		<text x="160" class="info">A sends SDPs to the MX server</text>
+		<text x="160" class="info">Peer A creates SDP offer</text>
 		</g>
 	
 	<g class="src-a" transform="translate(0, 70)">
 		<text x="-140" y="0">t1</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="0" x2="110" class="arrow" />
-		<text x="160" class="info">SDPs are forwarded to peer B</text>
+		<line x1="-110" x2="-60" class="arrow" />
+		<text x="160" class="info">Peer A requests ICE candidates</text>
 		</g>
 	
 	<g class="src-a" transform="translate(0, 100)">
 		<text x="-140" y="0">t2</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="110" x2="0" class="arrow" />
-		<text x="160" class="info">Peer B sends SDP</text>
+		<line x1="-60" x2="-110" class="arrow" />
+		<text x="160" class="info">STUN returns ICE candidates</text>
 		</g>
 	
 	<g class="src-a" transform="translate(0, 130)">
 		<text x="-140" y="0">t3</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="0" x2="-110" class="arrow" />
-		<text x="160" class="info">MX server forwards SDP</text>
+		<text x="160" class="info">SDP complete, A sets local description</text>
 		</g>
 	
 	<g class="src-a" transform="translate(0, 160)">
 		<text x="-140" y="0">t4</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="-110" x2="-60" class="arrow" />
-		<text x="160" class="info">Peer A requests ICE candidates</text>
+		<line x1="-110" x2="0" class="arrow" />
+		<text x="160" class="info">A sends SDP offer to external relay</text>
 		</g>
 	
 	<g class="src-a" transform="translate(0, 190)">
 		<text x="-140" y="0">t5</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="-60" x2="-110" class="arrow" />
-		<text x="160" class="info">STUN returns ICE candidates</text>
+		<line x1="0" x2="110" class="arrow" />
+		<text x="160" class="info">SDP offer is forwarded to peer B</text>
 		</g>
 	
 	<g class="src-a" transform="translate(0, 220)">
 		<text x="-140" y="0">t6</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="-110" x2="0" class="arrow" />
-		<text x="160" class="info">Peer A sends ICE candidates</text>
+		<text x="160" class="info">B sets remote description</text>
 		</g>
-	
+
 	<g class="src-a" transform="translate(0, 250)">
 		<text x="-140" y="0">t7</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="0" x2="110" class="arrow" />
-		<text x="160" class="info">MX server forwards ICE candidates</text>
+		<text x="160" class="info">B creates SDP answer</text>
 		</g>
 
 	<g class="src-a" transform="translate(0, 280)">
@@ -125,33 +121,51 @@
 		<line x1="60" x2="110" class="arrow" />
 		<text x="160" class="info">STUN returns ICE candidates</text>
 		</g>
-	
+
 	<g class="src-a" transform="translate(0, 340)">
 		<text x="-140" y="0">t10</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="110" x2="0" class="arrow" />
-		<text x="160" class="info">Peer B sends ICE candidates</text>
+		<text x="160" class="info">SDP answer complete, B sets local description</text>
 		</g>
-	
+
 	<g class="src-a" transform="translate(0, 370)">
 		<text x="-140" y="0">t11</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="0" x2="-110" class="arrow" />
-		<text x="160" class="info">MX server forwards ICE candidates</text>
+		<line x1="110" x2="0" class="arrow" />
+		<text x="160" class="info">Peer B sends SDP answer</text>
 		</g>
-
+	
 	<g class="src-a" transform="translate(0, 400)">
 		<text x="-140" y="0">t12</text>
 		<line x1="-130" x2="150" class="time-line" />
-		<line x1="-110" x2="110" class="arrow" />
-		<text x="160" class="info">Peer A connects to Peer B</text>
+		<line x1="0" x2="-110" class="arrow" />
+		<text x="160" class="info">MX server forwards SDP answer</text>
 		</g>
-
+	
 	<g class="src-a" transform="translate(0, 430)">
 		<text x="-140" y="0">t13</text>
 		<line x1="-130" x2="150" class="time-line" />
+		<text x="160" class="info">Peer A sets remote description from SDP answer</text>
+		</g>
+	
+	<g class="src-a" transform="translate(0, 460)">
+		<text x="-140" y="0">t14</text>
+		<line x1="-130" x2="150" class="time-line" />
+		<text x="160" class="info">Connection established</text>
+		</g>
+
+	<g class="src-a" transform="translate(0, 490)">
+		<text x="-140" y="0">t15</text>
+		<line x1="-130" x2="150" class="time-line" />
+		<line x1="-110" x2="110" class="arrow" />
+		<text x="160" class="info">Peer A sends message to Peer B</text>
+		</g>
+
+	<g class="src-a" transform="translate(0, 520)">
+		<text x="-140" y="0">t16</text>
+		<line x1="-130" x2="150" class="time-line" />
 		<line x1="110" x2="-110" class="arrow" />
-		<text x="160" class="info">Peer B connects to Peer A</text>
+		<text x="160" class="info">Peer B sends message to Peer A</text>
 		</g>
 	</g>
 	
