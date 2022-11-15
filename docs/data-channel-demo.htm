@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="template-info" file-name="empty.htm" version="2022-10-09" editor="USP" />
+<meta name="author" content="USP" />
+<meta name="creation-date" content="2022-11-15" />
+<meta name="editor" content="USP" />
+<meta name="change-date" content="2022-11-15" />
+<meta name="version" content="1" />
+<meta name="categories" content="Programming > Web Technologies > WebRTC" />
+<meta name="tags" content="programming, Web, technology, WebRTC, real-time, communication, JavaScript, browser, data, peer-to-peer, demo" />
+<meta name="description" content="On this page we will develop a minimalistic WebRTC data channel application." />
+
+<link rel="stylesheet" href="/inc/page.css" />
+<link rel="stylesheet" href="/local.css" />
+
+<style>
+</style>
+ 
+<title>WebRTC &endash; Data Channel Demo</title>
+
+</head><body><header id="page-header"><object data="title.svg" type="image/svg+xml" style="height : 100% ; margin-left : 160px"></object></header><div id="main-toolbar"></div><main id="page-content">
+
+<h1>Data Channel Demo</h1>
+
+<p id="page-abstract"></p>
+
+<p>The demo 1 page can be loaded from <a href="demo-01/demo-01.htm">here</a>.</p>
+
+<h2 cbc>Data Channel Demo</h2><div>
+
+<p>As always, the entire code is encapsulated in an anonymous immediately invoked function expression:</p>
+
+<figcaption class="listing">Encapsulation in and IIFE</figcaption>
+<pre>
+( function ( ) { <cc>/* Code here */</cc> } ) ( ) ;
+</pre>
+
+<p>The first action is to extract the peer name from the url search string (the text appearing after the "?" question mark):</p>
+
+<figcaption class="listing">Setting the page heading</figcaption>
+<pre>
+const sp = ( new URL( document.location )).searchParams ;
+const peerName = sp.get( "peer-name" ) || "Unnamed Peer" ;
+document.getElementById( "peer-name" ).innerText = peerName;
+</pre>
+
+<p>The peer name string is copied into the H1 heading element. This prominent markup makes it easier to track which of the two peers we are debugging.</p>
+
+<figcaption class="listing">Page heading carries the peer name</figcaption>
+<pre>&lt;h1 id="peer-name"&gt;Peer A&lt;/h1&gt;</pre>
+
+<p>You can also lookup the <tt>peerName</tt> in the browser developer tools to find out which peer you are working with.</p>
+
+<p>Then the script initializes an <tt>RTCPeerConnection</tt> object. The options contain a list of ICE servers we are going to use; there are two STUN servers and a TURN server, which is not relevant in this example.</p>
+
+<figcaption class="listing">Creating the peer connection object</figcaption>
+<pre>
+const options = { 
+    <hi>iceServers</hi> : [ {
+        urls: 'turn:my-turn-server.mycompany.com:19403',
+        username: 'optional-username',
+        credential: 'auth-token'
+        } , {
+        <hi>urls</hi>: [ 'stun:stun1.1.google.com:19302', 'stun:stun2.1.google.com:19302' ] 
+    }	]	} ;
+
+    const <hi>peerConnection</hi> = new <hi>RTCPeerConnection</hi>( options );
+</pre>
+
+<p>One of the first steps will be to retrieve ICE candidates for the peer connection. Therefore we add an event handler on the <tt>peerConnection</tt> which monitors the procedure and update the local description in the GUI:</p>
+
+<figcaption class="listing">Monitoring ICE local description changes</figcaption>
+<pre>
+peerConnection
+    .addEventListener( "<hi>icecandidate</hi>", async ( e ) => { 
+    const description = JSON.stringify ( <hi>peerConnection.localDescription</hi> );
+    console.log( "peerConnection.onIceCandidate" );
+    console.log( description );
+    if ( e.candidate ) document.getElementById( "<hi>local-sdp</hi>" ).innerHTML = <hi>description</hi>;
+    } ) ;
+</pre>
+
+<p>Then we add an event listener that monitors the opening of a data channel by the <em>remote peer</em>. The code saves a reference to the <tt>channel</tt> passed in the event object <tt>e</tt>:</p>
+
+<figcaption class="listing">Monitoring data channel opened by remote peer</figcaption>
+<pre>
+peerConnection.addEventListener( "<hi>datachannel</hi>", e => {
+    console.log( "Data channel opened by remote peer" );
+    const channel = <hi>e.channel</hi>;
+    channel.addEventListener( "<hi>open</hi>", ( ) => {
+        console.log( "Data channel to remote peer connected" );
+        channel.send( "Hello from " + peerName );
+        } ) ;
+    channel.addEventListener( "<hi>message</hi>", ( e ) => { 
+        console.log( "Message from peer:" );
+        console.log( <hi>e.data</hi> );
+        document.getElementById( "messages-from-peer" ).innerHTML 
+            += <hi>e.data</hi> + "&lt;br/&gt;" ;
+        } ) ;
+    channel.addEventListener( "<hi>close</hi>", ( ) => { 
+        console.log( "Data channel to remote peer closed." );
+        } ) ;
+    } ) ;
+</pre>
+
+<p>Then we add event handlers (<tt>open</tt>, <tt>message</tt> and <tt>close</tt>) to monitor activity on the channel. When a message arrives, the message is printed to the console and appended to the GUI box "messages-from-peer".</p>
+
+<p>The next few instructions create a data channel on the <em>local side</em> of the connection. The function is passed a topic name in the parameter:</p>
+
+<figcaption class="listing">Creating a data connection object</figcaption>
+<pre>
+let dataChannel = peerConnection.<hi>createDataChannel</hi>( "data-channel"  );
+
+dataChannel.addEventListener( "<hi>open</hi>", ( ) => {
+    console.log( "Connection opened." );
+    dataChannel.send( "Hello from " + peerName );
+    } ) ;
+
+dataChannel.addEventListener( "<hi>message</hi>", e => {
+    console.log( "Message from remote peer" );
+    console.log( e.data );
+    document.getElementById( "messages-from-peer" ).innerHTML += <hi>e.data</hi> + "<br/>" ;
+    } ) ;
+
+dataChannel.addEventListener( "<hi>close</hi>", ( ) => {
+    console.log( "Connection closed." );
+    } ) ;
+</pre>
+
+<p>Then we add event handlers to monitor the channel activity, exactly like we did with the remote end of the data channel above.</p>
+
+<p>The first action to be carried out by the local peer is to click the "create local SDP offer" button to create the decription of the local end of the connection:</p>
+
+<figcaption class="listing">Creating the local description for the SDP offer</figcaption>
+<pre>
+document.getElementById( "<hi>create-sdp-offer</hi>" )
+    .addEventListener( "click", async ( ) => {
+        let <hi>description</hi> = await peerConnection.<hi>createOffer</hi>( );
+        await peerConnection.<hi>setLocalDescription</hi>( description );
+        console.log( "Local description for SDP offer created." );
+    } ) ;
+</pre>
+
+<p>The <tt>RTCPeerConnection</tt> object has a function for that purpose. The function returns a <tt>description</tt> object which must be copied to the <tt>localDescription</tt> member of the peer connection object. This causes the <tt>peerConnection</tt> object to fire the <tt>icecandidate</tt> event several times, and its event handler update the local description box in the GUI.</p>
+
+<p>This offer must be sent over to the other peer. WebRTC does not specify how that is done, its up to the implemenation. For demonstration purposes we will use the OS clipboard. So the "Send offer to peer" button copies the local description to the clipboard:</p>
+
+<figcaption class="listing">Sending the local description via clipboard</figcaption>
+<pre>
+document.getElementById( "<hi>send-sdp-offer</hi>" )
+    .addEventListener( "click", ( ) => { 
+    const description = JSON.stringify ( <hi>peerConnection.localDescription</hi> );
+    navigator.<hi>clipboard.writeText</hi>( description );
+    console.log( "SDP offer copied to clipboard" );
+    } ) ;
+</pre>
+
+<p>The next step of the procedure is then carried out by the remote peer:</p>
+
+<figcaption class="listing">Other peer receives the SDP offer</figcaption>
+<pre>
+document.getElementById( "<hi>receive-sdp-offer</hi>" )
+    .addEventListener( "click", async ( ) => {
+    const offer = await navigator.<hi>clipboard.readText</hi>( )
+    document.getElementById( "remote-sdp" ).innerText = offer ;
+    console.log( "SDP offer retrieved from clipboard" );
+    } ) ;
+</pre>
+
+<p>The function reads the remote peer description text from the clipboard and writes it to the "Remote description" box in the GUI. One more step is necessary to complete the action:</p>
+
+<figcaption class="listing">Accepting the SDP offer</figcaption>
+<pre>
+document.getElementById( "<hi>accept-sdp-offer</hi>" )
+    .addEventListener( "click", ( ) => {
+    const <hi>description</hi>  = JSON.parse ( document.getElementById( "remote-sdp" ).innerText );
+    peerConnection.setRemoteDescription( <hi>description</hi> );
+    console.log( "Remote description set from SDP offer" );
+    } ) ;
+</pre>
+
+<p>The remote peer description is parsed into a JSON object and then passed to the <tt>peerConnection.setRemoteDescription</tt> method.</p>
+
+<figcaption class="listing">Setting the local description for the SDP answer</figcaption>
+<pre>
+document.getElementById( "<hi>create-sdp-answer</hi>" )
+    .addEventListener( "click", async ( ) => {
+        let description = await peerConnection.<hi>createAnswer</hi>( );
+        await peerConnection.<hi>setLocalDescription</hi>( description );
+        console.log( "Local description for SDP answer set." );
+    } ) ;
+</pre>
+
+<p>This is nearly the same code as used in the other peer to create its local description for the SDP offer. The difference is that the <tt>createAnswer</tt> method is used instead of <tt>createOffer</tt>.</p>
+
+<p>Then the answer must be sent to the other peer. Again via clipboard:</p>
+
+<figcaption class="listing">Sending the SDP answer</figcaption>
+<pre>
+document.getElementById( "<hi>send-sdp-answer</hi>" )
+    .addEventListener( "click", ( ) => { 
+    const description = JSON.stringify ( <hi>peerConnection.localDescription</hi> );
+    navigator.<hi>clipboard.writeText</hi>( description );
+    console.log( "Local description for SDP answer copied to clipboard" );
+    } ) ;
+</pre>
+
+<p>The other peer retrieves the SDP answer from the clipboard:</p>
+
+<figcaption class="listing">Peer retrieves the remote description of the SDP answer</figcaption>
+<pre>
+document.getElementById( "<hi>receive-sdp-answer</hi>" )
+    .addEventListener( "click", async ( ) => {
+    const <hi>description</hi> = await navigator.<hi>clipboard.readText</hi>( )
+    document.getElementById( "remote-sdp" ).innerText = <hi>description</hi> ;
+    console.log( "Remote description of SDP answer retrieved from clipboard" );
+    } ) ;
+</pre>
+
+<p>To accept the SDP answer, the remote description is passed to the <tt>peerConnection.setRemoteDescription</tt> method:</p>
+
+<figcaption class="listing">Accepting the SDP answer</figcaption>
+<pre>
+document.getElementById( "<hi>accept-sdp-answer</hi>" )
+    .addEventListener( "click", ( ) => {
+    const <hi>description</hi> = JSON.parse ( document.getElementById( "remote-sdp" ).innerText );
+    peerConnection.<hi>setRemoteDescription</hi>( description );
+    console.log( "Remote description set from SDP answer." );
+    } ) ;
+</pre>
+
+<p>When this step succeeds, the connection between peers is established and the data channel end points are opened on both sides of the connection, which causes their <tt>open</tt> events to be fired.</p>
+
+<p>Now that is everything in place, peers can exchange messages:</p>
+
+<figcaption class="listing">Sending messages</figcaption>
+<pre>
+document.getElementById( "<hi>send-message</hi>" )
+    .addEventListener( "click", ( ) => {
+    const msgbox = document.getElementById( "message-to-peer" );
+    <hi>dataChannel.send</hi>( msgbox.innerText );
+    msgbox.innerText = "" ;
+    } ) ;
+</pre>
+
+<p>When the message arrives at the other peer, ist <tt>message</tt> event is fired, and the event handler copies the message text into the GUI box.</p>
+
+<!--h2--></div>
+
+<h2 cbc>Operational Walk-Through</h2><div>
+
+<ol class="instructions">
+<li>To follow along, click on these links <a href="demo-01/demo-01.htm?peer-name=Peer%20A" target="_blank">Peer A</a> and <a href="demo-01/demo-01.htm?peer-name=Peer%20B" target="_blank">Peer B</a> to open the demo page in two separate browser tabs. Note that they are titled "Peer A" and "Peer B".</li>
+
+<li>Open the browser developer tools for both tabs. Notice they can be recognized by the URL ending on "Peer%20A" and "Peer%20B".</li>
+
+<li>Switch both to the "Console" tab.</li>
+
+<li>Switch to Peer A and click button 1 "Create SDP offer". Notice that the "Local Description" box is now filled with text. This is Peer A's connection description for the SDP offer.</li>
+
+<li>Switch to Peer A devtools and inspect the console messages. Notice the <tt>icecandidate</tt> event handler output.</li>
+
+<li>Switch to Peer A window and click button 2 "Send offer to peer". Notice the output "SDP offer copied to clipboard" in the devtools window.</li>
+
+<li>Switch to the Peer B devtools window. The console tab should be empty at this point.</li>
+
+<li>Switch to the Peer B tab and click the button 3 "Receive SDP offer". The description of Peer A offer should appear in the Remote Description box.</li>
+
+<li>On Peer B tab, click the button 4 "Accept SDP offer", then activate the devtools for Peer B. Notice the string "Remote description set from SDP offer" on the console tab.</li>
+
+<li>On Peer B tab, click the button 5 "Create SDP answer". Notice that the local description window is now filled with the SDP answer.</li>
+
+<li>Switch to Peer B devtools. Notice the output of <tt>peerConnection.onIceCandidate</tt> event handlers.</li>
+
+<li>Switch to Peer B tab and click the button 6 "Send SDP answer". Peer B's local descritpion for the answer is copied to the clipboard.</li>
+
+<li>Switch to Peer A tab and click button 7 "Receive SDP answer". The Remote Description box is now filled with the description of Peer B's answer.</li>
+
+<li>On Peer A tab, click button 8 "Accept SDP answer". Notice that messages arrived in the <tt>Messages from Peer</tt> box.</li>
+
+<li>Switch to Peer A devtools and inspect the console messages.
+<pre>
+Remote description of SDP answer retrieved from clipboard.
+Remote description set from SDP answer.
+Connection to remote peer opened.
+Data channel opened by remote peer
+Data channel to remote peer connected.
+Message from peer:
+Hello from Peer B
+Message from remote peer
+Hello from Peer B
+</pre></li>
+
+<li>Switch to Peer B tab and inspect the messages:
+<pre>
+Local description for SDP answer copied to clipboard.
+Connection to remote peer opened.
+Data channel opened by remote peer
+Data channel to remote peer connected.
+Message from remote peer
+Hello from peer A
+Message from peer:
+Hello from Peer A
+</pre></li>
+</ol>
+
+<p>Note that the connection is established with Peer A setting the remote description. Then the data channels are opened and the first few messages are exchanged. Thereafter you can type messages and click button 9 "Send message" to exchange messages.</p>
+
+<ol class="instructions continue">
+<li>Open the network tab in the browser dev tools. Notice that message traffic is not recorded there.</li>
+</ol>
+
+<!--h2--></div>
+
+<h2 cbc>Conclusion</h2><div>
+
+<p>We have successfully created a two-point chat application, where messages are exchanged directly between browser windows without an intermediate relay server. We have used the clipboard for the exchange of SDP offers and answers during signaling phase. This works fine if both windows are on the same machine. On different machines, the help of an additional transport is needed, email or messengers for example.</p>
+
+<p>Note that the example does not include error handling and sanity checks on purpose. For example, the data connection is closed as soon as one peer reloads the page.</p>
+
+<!--h2--></div>
+
+</main><footer id="page-footer"></footer><script type="module" src="/inc/page.js" ></script></body></html>
